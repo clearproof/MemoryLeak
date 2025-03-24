@@ -1,97 +1,95 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Memory leak when using NotoNastaliqUrdu font with lineHeight and fixed height/maxHeight
 
-# Getting Started
+## Environment Information
+- React Native Version: 0.78.1
+- Platform: iOS 
+- Development OS: macOS Sequoia 15.3.2
+- Xcode Version: 16.2
+- Node Version: 22.13.1
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Description
+When using the NotoNastaliqUrdu font with a combination of lineHeight and a fixed height/maxHeight container, a severe memory leak occurs on iOS. The memory usage continuously increases until the app freezes or crashes.
 
-## Step 1: Start Metro
+The issue appears to be related to text rendering when Urdu text with the NotoNastaliqUrdu font stretches beyond the fixed container boundaries. This specifically happens when lineHeight is applied to the text style and the container has a fixed height or maxHeight constraint (there can be more instances of this, height is just an example we observed).
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Steps to Reproduce
+1. Clone the reproduction repository: https://github.com/clearproof/RNTextHeightMemoryLeak
+2. Install dependencies: `npm install`
+3. Run the app on iOS: `npm run ios`
+4. Click the "Click me" button a few times and notice the app works fine initially
+5. Uncomment line 42 in App.tsx (the lineHeight property)
+6. Observe the app's memory usage continuously increasing in Xcode's Debug Navigator
+7. The app will eventually become unresponsive and the "Click me" button cannot be clicked
 
-```sh
-# Using npm
-npm start
+## Code Example
+```tsx
+import React from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  SafeAreaView,
 
-# OR using Yarn
-yarn start
+} from 'react-native';
+
+
+function App(): React.JSX.Element {
+
+  const longUrduText = "اِبتدائی لے آؤٹ، جو کہ وسیع پیمانے پر دنیا کے کئی ممالک میں استعمال ہوتا ہے۔ یہ ایڈیشن آیات کے کلاسیک مقامات قائم رکھتا ہے۔";
+
+  return (
+    <SafeAreaView style={styles.container}>
+     <Button title="Click me" onPress={() => console.log('clicked')} />
+     <View style={styles.footer}>
+        <Text style={styles.text}>{longUrduText}</Text>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footer: {
+    // When using NotoNastaliqUrdu font and lineHeight with fixed height (or maxHeight) it causes a memory leak
+    // there can be more instances of this, height is just an example we observed
+    height: 60,
+    backgroundColor: 'red',
+  },
+  text: {
+    fontSize: 12,
+    // Since NotoNastaliqUrdu font is really large, we need a 3 * fontSize lineHeight
+    // the memory will keep increasing and the app will crash on iOS 
+    // lineHeight: 36, // uncomment this line to reproduce the memory leak
+    fontFamily: 'NotoNastaliqUrdu',
+  },
+});
+
+export default App;
 ```
 
-## Step 2: Build and run your app
+## Expected Behavior
+The text should render properly within the container without causing any memory leaks. The app should maintain stable memory usage regardless of the combination of lineHeight and fixed height/maxHeight.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## Actual Behavior
+When using NotoNastaliqUrdu font with lineHeight and a container with fixed height/maxHeight:
+1. Memory usage continuously increases
+2. The UI freezes immediately
+3. Cannot reload the app
+4. The app may crash if left running long enough
 
-### Android
+This issue is reproducible 100% of the time when the specified font, lineHeight, and fixed height/maxHeight are used together.
 
-```sh
-# Using npm
-npm run android
+## Additional Information
+- The issue only happens with the NotoNastaliqUrdu font, not with standard fonts
+- Removing the lineHeight resolves the issue but font cannot be read properly
+- This appears to be related to the complex text rendering required for the Nastaliq script in Urdu
 
-# OR using Yarn
-yarn android
-```
+This is blocking our application to adopt the NotoNastaliq font for Urdu-speaking users.
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Any help resolving this issue would be greatly appreciated.
