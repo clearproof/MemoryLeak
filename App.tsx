@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     // Since NotoNastaliqUrdu font is really large, we need a 3 * fontSize lineHeight
     // the memory will keep increasing and the app will crash on iOS 
-    lineHeight: 36, // uncomment this line to reproduce the memory leak
+    // lineHeight: 36, // uncomment this line to reproduce the memory leak
     fontFamily: 'NotoNastaliqUrdu',
   },
 });
