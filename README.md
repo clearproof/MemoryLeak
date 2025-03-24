@@ -14,7 +14,7 @@ The issue appears to be related to text rendering when Urdu text with the NotoNa
 
 
 ## Steps to Reproduce
-1. Clone the reproduction repository: https://github.com/clearproof/RNTextHeightMemoryLeak
+1. Clone the reproduction repository: https://github.com/clearproof/MemoryLeak
 2. Install dependencies: `npm install`
 3. Run the app on iOS: `npm run ios`
 4. Click the "Click me" button a few times and notice the app works fine initially
