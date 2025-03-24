@@ -1,4 +1,4 @@
-# Memory leak when using NotoNastaliqUrdu font with lineHeight and fixed height/maxHeight
+# iOS: Memory leak when using NotoNastaliqUrdu font with lineHeight and fixed height
 
 ## Environment Information
 - React Native Version: 0.78.1
